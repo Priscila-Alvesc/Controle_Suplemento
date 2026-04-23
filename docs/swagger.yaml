@@ -1,0 +1,539 @@
+openapi: 3.0.3
+info:
+  title: API de Controle de Estoque de Suplementos
+  version: 1.0.0
+  description: >
+    Especificação OpenAPI da API REST responsável pelo cadastro e autenticação
+    de usuários, consulta de disponibilidade em estoque e retirada controlada
+    de doses de suplemento.
+
+    Esta definição foi construída com base nas user stories US01 a US09.
+servers:
+  - url: http://localhost:3000
+    description: Ambiente local
+
+tags:
+  - name: Usuários
+    description: Operações relacionadas ao cadastro de usuários.
+  - name: Autenticação
+    description: Operações de autenticação e emissão de token JWT.
+  - name: Estoque
+    description: Consulta da disponibilidade de doses em estoque.
+  - name: Retiradas
+    description: Operações de retirada e consulta de histórico diário.
+
+paths:
+  /api/users:
+    post:
+      tags:
+        - Usuários
+      summary: Cadastrar usuário
+      description: >
+        Realiza o cadastro de um novo usuário na aplicação. O e-mail deve ser
+        único na base.
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+            examples:
+              cadastroValido:
+                summary: Exemplo de cadastro válido
+                value:
+                  name: Priscila Alves
+                  email: priscila.alves@email.com
+                  password: "123456"
+      responses:
+        '201':
+          description: Usuário cadastrado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+              examples:
+                sucesso:
+                  value:
+                    id: 5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41
+                    name: Priscila Alves
+                    email: priscila.alves@email.com
+                    createdAt: '2026-04-23T12:00:00Z'
+        '400':
+          description: Dados obrigatórios ausentes ou inválidos.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                dadosInvalidos:
+                  value:
+                    error: Dados de entrada inválidos.
+                    details:
+                      - field: email
+                        message: O e-mail informado é inválido.
+        '409':
+          description: Já existe um usuário cadastrado com o mesmo e-mail.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                usuarioDuplicado:
+                  value:
+                    error: Usuário já cadastrado.
+                    details:
+                      - field: email
+                        message: Já existe um usuário com o e-mail informado.
+        '503':
+          description: Serviço temporariamente indisponível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Autenticar usuário
+      description: >
+        Autentica um usuário previamente cadastrado e retorna um token JWT para
+        acesso aos recursos protegidos.
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              loginValido:
+                value:
+                  email: priscila.alves@email.com
+                  password: "123456"
+      responses:
+        '200':
+          description: Usuário autenticado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+              examples:
+                autenticado:
+                  value:
+                    accessToken: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                    tokenType: Bearer
+                    expiresIn: 3600
+        '401':
+          description: Credenciais inválidas.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                credenciaisInvalidas:
+                  value:
+                    error: Credenciais inválidas.
+        '503':
+          description: Serviço temporariamente indisponível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/stock/doses:
+    get:
+      tags:
+        - Estoque
+      summary: Consultar doses disponíveis em estoque
+      description: >
+        Retorna a quantidade de doses disponíveis com base no estoque atual,
+        considerando que cada dose equivale a 100 gramas.
+      operationId: getAvailableDoses
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Quantidade de doses disponível retornada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockDoseResponse'
+              examples:
+                estoqueDisponivel:
+                  value:
+                    availableDoses: 50
+                    availableGrams: 5000
+                    doseSizeGrams: 100
+                    status: AVAILABLE
+                estoqueInsuficiente:
+                  value:
+                    availableDoses: 0
+                    availableGrams: 0
+                    doseSizeGrams: 100
+                    status: UNAVAILABLE
+        '401':
+          description: Acesso negado por ausência ou invalidade do token JWT.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                naoAutenticado:
+                  value:
+                    error: Usuário não autenticado.
+        '503':
+          description: Serviço temporariamente indisponível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/withdrawals:
+    post:
+      tags:
+        - Retiradas
+      summary: Registrar retirada unitária de dose
+      description: >
+        Registra a retirada de uma única dose de suplemento por usuário
+        autenticado, respeitando o limite de 4 doses por dia e a disponibilidade
+        de estoque.
+      operationId: createWithdrawal
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWithdrawalRequest'
+            examples:
+              retiradaValida:
+                value:
+                  quantity: 1
+      responses:
+        '201':
+          description: Retirada registrada com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WithdrawalResponse'
+              examples:
+                retiradaComSucesso:
+                  value:
+                    id: 8acfe90c-d0b3-4c17-90f8-a6dbd01b278a
+                    userId: 5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41
+                    quantity: 1
+                    consumedGrams: 100
+                    remainingDoses: 49
+                    withdrawnAt: '2026-04-23T12:15:00Z'
+        '400':
+          description: Quantidade solicitada inválida.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                quantidadeInvalida:
+                  value:
+                    error: Quantidade inválida para retirada.
+                    details:
+                      - field: quantity
+                        message: Apenas 1 dose por solicitação é permitida.
+        '401':
+          description: Acesso negado por ausência ou invalidade do token JWT.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Violação de regra de negócio para a retirada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                limiteExcedido:
+                  value:
+                    error: Limite diário de doses excedido.
+                estoqueInsuficiente:
+                  value:
+                    error: Estoque insuficiente para retirada.
+        '503':
+          description: Serviço temporariamente indisponível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/withdrawals/daily:
+    get:
+      tags:
+        - Retiradas
+      summary: Consultar retiradas do usuário no dia
+      description: >
+        Retorna o histórico de retiradas do usuário autenticado na data corrente,
+        permitindo o controle do limite diário de consumo.
+      operationId: getDailyWithdrawals
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Histórico diário retornado com sucesso.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyWithdrawalsResponse'
+              examples:
+                historicoDiario:
+                  value:
+                    userId: 5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41
+                    date: '2026-04-23'
+                    totalWithdrawals: 2
+                    totalConsumedGrams: 200
+                    remainingDailyLimit: 2
+                    withdrawals:
+                      - id: a3978e85-3e2b-4e45-b8b7-06d0cb181fb5
+                        quantity: 1
+                        consumedGrams: 100
+                        withdrawnAt: '2026-04-23T08:00:00Z'
+                      - id: 8acfe90c-d0b3-4c17-90f8-a6dbd01b278a
+                        quantity: 1
+                        consumedGrams: 100
+                        withdrawnAt: '2026-04-23T12:15:00Z'
+        '401':
+          description: Acesso negado por ausência ou invalidade do token JWT.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Serviço temporariamente indisponível.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    CreateUserRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+          description: Nome completo do usuário.
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: E-mail único do usuário.
+        password:
+          type: string
+          minLength: 6
+          maxLength: 60
+          description: Senha de acesso do usuário.
+
+    UserResponse:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 6
+
+    LoginResponse:
+      type: object
+      required:
+        - accessToken
+        - tokenType
+        - expiresIn
+      properties:
+        accessToken:
+          type: string
+          description: Token JWT de autenticação.
+        tokenType:
+          type: string
+          example: Bearer
+        expiresIn:
+          type: integer
+          example: 3600
+          description: Tempo de expiração do token em segundos.
+
+    StockDoseResponse:
+      type: object
+      required:
+        - availableDoses
+        - availableGrams
+        - doseSizeGrams
+        - status
+      properties:
+        availableDoses:
+          type: integer
+          minimum: 0
+          description: Quantidade de doses disponíveis para retirada.
+        availableGrams:
+          type: integer
+          minimum: 0
+          description: Quantidade total remanescente em gramas.
+        doseSizeGrams:
+          type: integer
+          example: 100
+        status:
+          type: string
+          enum:
+            - AVAILABLE
+            - UNAVAILABLE
+
+    CreateWithdrawalRequest:
+      type: object
+      required:
+        - quantity
+      properties:
+        quantity:
+          type: integer
+          enum:
+            - 1
+          description: Apenas 1 dose por solicitação é aceita.
+
+    WithdrawalResponse:
+      type: object
+      required:
+        - id
+        - userId
+        - quantity
+        - consumedGrams
+        - remainingDoses
+        - withdrawnAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          example: 1
+        consumedGrams:
+          type: integer
+          example: 100
+        remainingDoses:
+          type: integer
+          minimum: 0
+        withdrawnAt:
+          type: string
+          format: date-time
+
+    DailyWithdrawalItem:
+      type: object
+      required:
+        - id
+        - quantity
+        - consumedGrams
+        - withdrawnAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        quantity:
+          type: integer
+          example: 1
+        consumedGrams:
+          type: integer
+          example: 100
+        withdrawnAt:
+          type: string
+          format: date-time
+
+    DailyWithdrawalsResponse:
+      type: object
+      required:
+        - userId
+        - date
+        - totalWithdrawals
+        - totalConsumedGrams
+        - remainingDailyLimit
+        - withdrawals
+      properties:
+        userId:
+          type: string
+          format: uuid
+        date:
+          type: string
+          format: date
+        totalWithdrawals:
+          type: integer
+          minimum: 0
+          maximum: 4
+        totalConsumedGrams:
+          type: integer
+          minimum: 0
+        remainingDailyLimit:
+          type: integer
+          minimum: 0
+          maximum: 4
+        withdrawals:
+          type: array
+          items:
+            $ref: '#/components/schemas/DailyWithdrawalItem'
+
+    ErrorDetail:
+      type: object
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+        details:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
