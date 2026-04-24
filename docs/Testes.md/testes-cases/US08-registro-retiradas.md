@@ -1,0 +1,335 @@
+[Caso de Teste 08.01] - Retirada bem-sucedida registra identificador do usuário
+
+Título: Validar que retirada registra o ID do usuário autenticado
+
+Operação: POST /api/withdrawals seguido de GET /api/withdrawals/daily
+Headers:
+
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Corpo da Requisição (POST):
+JSON
+  {
+    "quantity": 1
+  }
+
+Status Code Esperado (POST): 201 Created
+
+Resposta POST Esperada:
+JSON
+  {
+    "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+    "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+    "quantity": 1,
+    "consumedGrams": 100,
+    "remainingDoses": 49,
+    "withdrawnAt": "2026-04-24T14:30:00Z"
+  }
+
+Status Code Esperado (GET): 200 OK
+
+Resposta GET Esperada:
+JSON
+  {
+    "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+    "date": "2026-04-24",
+    "totalWithdrawals": 1,
+    "totalConsumedGrams": 100,
+    "remainingDailyLimit": 3,
+    "withdrawals": [
+      {
+        "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+        "quantity": 1,
+        "consumedGrams": 100,
+        "withdrawnAt": "2026-04-24T14:30:00Z"
+      }
+    ]
+  }
+Validação Esperada: userId na resposta de retirada corresponde ao usuário autenticado e aparece no histórico diário
+
+[Caso de Teste 08.02] - Retirada bem-sucedida registra data correta
+
+Título: Validar que retirada registra a data corrente (2026-04-24)
+
+Operação: POST /api/withdrawals seguido de GET /api/withdrawals/daily
+Headers:
+
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Corpo da Requisição (POST):
+JSON
+{
+  "quantity": 1
+}
+Status Code Esperado (POST): 201 Created
+Resposta POST Esperada:
+JSON
+{
+  "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+  "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+  "quantity": 1,
+  "consumedGrams": 100,
+  "remainingDoses": 49,
+  "withdrawnAt": "2026-04-24T14:30:00Z"
+}
+Status Code Esperado (GET): 200 OK
+Resposta GET Esperada:
+JSON
+{
+  "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+  "date": "2026-04-24",
+  "totalWithdrawals": 1,
+  "totalConsumedGrams": 100,
+  "remainingDailyLimit": 3,
+  "withdrawals": [
+    {
+      "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T14:30:00Z"
+    }
+  ]
+}
+Validação Esperada: date no histórico é "2026-04-24" (data corrente)
+[Caso de Teste 08.03] - Retirada bem-sucedida registra quantidade consumida (100 gramas)
+Título: Validar que retirada registra quantidade consumida em gramas
+Operação: POST /api/withdrawals seguido de GET /api/withdrawals/daily
+Headers:
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Corpo da Requisição (POST):
+JSON
+{
+  "quantity": 1
+}
+Status Code Esperado (POST): 201 Created
+Resposta POST Esperada:
+JSON
+{
+  "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+  "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+  "quantity": 1,
+  "consumedGrams": 100,
+  "remainingDoses": 49,
+  "withdrawnAt": "2026-04-24T14:30:00Z"
+}
+Status Code Esperado (GET): 200 OK
+Resposta GET Esperada:
+JSON
+{
+  "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+  "date": "2026-04-24",
+  "totalWithdrawals": 1,
+  "totalConsumedGrams": 100,
+  "remainingDailyLimit": 3,
+  "withdrawals": [
+    {
+      "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T14:30:00Z"
+    }
+  ]
+}
+Validação Esperada: consumedGrams = 100 em cada retirada e totalConsumedGrams = 100 no histórico
+[Caso de Teste 08.04] - Histórico diário consideram registros existentes para validação de limite
+Título: Validar que segunda retirada verifica limites baseado em registros anteriores do dia
+Operação: POST /api/withdrawals (1ª vez) → POST /api/withdrawals (2ª vez) → GET /api/withdrawals/daily
+Headers:
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Corpo da Requisição (POST 1ª):
+JSON
+{
+  "quantity": 1
+}
+Status Code Esperado (POST 1ª): 201 Created
+Corpo da Requisição (POST 2ª):
+JSON
+{
+  "quantity": 1
+}
+Status Code Esperado (POST 2ª): 201 Created
+Status Code Esperado (GET): 200 OK
+Resposta GET Esperada:
+JSON
+{
+  "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+  "date": "2026-04-24",
+  "totalWithdrawals": 2,
+  "totalConsumedGrams": 200,
+  "remainingDailyLimit": 2,
+  "withdrawals": [
+    {
+      "id": "a3978e85-3e2b-4e45-b8b7-06d0cb181fb5",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T08:00:00Z"
+    },
+    {
+      "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T12:15:00Z"
+    }
+  ]
+}
+Validação Esperada: Ambas retiradas são permitidas, pois 2 < 4 (limite diário)
+[Caso de Teste 08.05] - Histórico diário bloqueia 5ª retirada considerando registros do dia
+Título: Validar que 5ª retirada é rejeitada porque registros anteriores indicam limite atingido
+Operação: POST /api/withdrawals (5ª tentativa após 4 retiradas prévias)
+Headers:
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Corpo da Requisição:
+JSON
+{
+  "quantity": 1
+}
+Status Code Esperado: 409 Conflict
+Corpo da Resposta Esperado:
+JSON
+{
+  "error": "Limite diário de doses excedido."
+}
+Pré-condição: 4 retiradas já registradas no dia corrente
+Validação Esperada: Sistema consulta registros do dia e rejeita porque totalWithdrawals = 4
+[Caso de Teste 08.06] - Registros de retirada possuem timestamp correto
+Título: Validar que cada retirada registra o timestamp (data e hora) exato da operação
+Operação: POST /api/withdrawals (3 retiradas em horários diferentes) → GET /api/withdrawals/daily
+Headers:
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Status Code Esperado (GET): 200 OK
+Resposta GET Esperada:
+JSON
+{
+  "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+  "date": "2026-04-24",
+  "totalWithdrawals": 3,
+  "totalConsumedGrams": 300,
+  "remainingDailyLimit": 1,
+  "withdrawals": [
+    {
+      "id": "a3978e85-3e2b-4e45-b8b7-06d0cb181fb5",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T08:00:00Z"
+    },
+    {
+      "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T12:15:00Z"
+    },
+    {
+      "id": "c7d9e2f4-5a1b-4c8e-b3f9-2d8e9f3a4b5c",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T16:45:00Z"
+    }
+  ]
+}
+Validação Esperada: Cada withdrawnAt é um timestamp ISO válido e reflete o horário da operação
+[Caso de Teste 08.07] - Consistência de registros entre múltiplas consultas do histórico
+Título: Validar que histórico diário retorna dados consistentes em múltiplas consultas
+Operação: GET /api/withdrawals/daily (1ª consulta) → GET /api/withdrawals/daily (2ª consulta)
+Headers:
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Status Code Esperado (1ª GET): 200 OK
+Resposta 1ª GET Esperada:
+JSON
+{
+  "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+  "date": "2026-04-24",
+  "totalWithdrawals": 2,
+  "totalConsumedGrams": 200,
+  "remainingDailyLimit": 2,
+  "withdrawals": [
+    {
+      "id": "a3978e85-3e2b-4e45-b8b7-06d0cb181fb5",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T08:00:00Z"
+    },
+    {
+      "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T12:15:00Z"
+    }
+  ]
+}
+Status Code Esperado (2ª GET): 200 OK
+Resposta 2ª GET Esperada: Idêntica à 1ª consulta
+Validação Esperada: Dados são idênticos em ambas consultas (sem alterações entre elas)
+[Caso de Teste 09.08] - Registros persistem após retiradas bem-sucedidas
+Operação: POST /api/withdrawals → esperar período → GET /api/withdrawals/daily
+Título: Validar que registros de retirada persistem no sistema após a operação
+Headers:
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Corpo da Requisição (POST):
+JSON
+{
+  "quantity": 1
+}
+Status Code Esperado (POST): 201 Created
+Status Code Esperado (GET): 200 OK
+Resposta GET Esperada: Contém a retirada registrada anteriormente
+Validação Esperada: Retirada realizada está presente no histórico diário
+[Caso de Teste 09.09] - Cada retirada recebe ID único
+Título: Validar que cada retirada registrada possui um ID único (UUID)
+Operação: POST /api/withdrawals (3 retiradas consecutivas) → GET /api/withdrawals/daily
+Headers:
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+Status Code Esperado (POST 1): 201 Created (retorna ID 1)
+Status Code Esperado (POST 2): 201 Created (retorna ID 2)
+Status Code Esperado (POST 3): 201 Created (retorna ID 3)
+Status Code Esperado (GET): 200 OK
+Resposta GET Esperada:
+JSON
+{
+  "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+  "date": "2026-04-24",
+  "totalWithdrawals": 3,
+  "totalConsumedGrams": 300,
+  "remainingDailyLimit": 1,
+  "withdrawals": [
+    {
+      "id": "a3978e85-3e2b-4e45-b8b7-06d0cb181fb5",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T08:00:00Z"
+    },
+    {
+      "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T12:15:00Z"
+    },
+    {
+      "id": "c7d9e2f4-5a1b-4c8e-b3f9-2d8e9f3a4b5c",
+      "quantity": 1,
+      "consumedGrams": 100,
+      "withdrawnAt": "2026-04-24T16:45:00Z"
+    }
+  ]
+}
+Validação Esperada: Todos os 3 IDs são únicos e diferentes entre si (nenhum ID é repetido)
+
+Resumo da Cobertura
+Caso	Objetivo	Tipo
+08.01	Integração - registro de userId	Integração 
+08.02	Integração - registro de data	Integração 
+08.03	Integração - registro de quantidade consumida	Integração 
+08.04	Integração - histórico considera registros para validação	Integração 
+08.05	Negócio - bloqueio de 5ª retirada com base em registros	Negócio 
+08.06	Validação - timestamps corretos em registros	Validação 
+08.07	Robustez - consistência entre consultas	Robustez ⚠️
+08.08	Persistência - registros persistem no sistema	Persistência 
+08.09	Validação - cada retirada possui ID único	Validação 
