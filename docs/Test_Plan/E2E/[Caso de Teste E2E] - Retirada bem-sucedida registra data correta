@@ -1,56 +1,4 @@
-[Caso de Teste 08.01] - Retirada bem-sucedida registra identificador do usuário
-
-Título: Validar que retirada registra o ID do usuário autenticado
-
-Operação: POST /api/withdrawals seguido de GET /api/withdrawals/daily
-Headers:
-
-Code
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-
-Corpo da Requisição (POST):
-JSON
-  {
-    "quantity": 1
-  }
-
-Status Code Esperado (POST): 201 Created
-
-Resposta POST Esperada:
-JSON
-  {
-    "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
-    "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
-    "quantity": 1,
-    "consumedGrams": 100,
-    "remainingDoses": 49,
-    "withdrawnAt": "2026-04-24T14:30:00Z"
-  }
-
-Status Code Esperado (GET): 200 OK
-
-Resposta GET Esperada:
-JSON
-  {
-    "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
-    "date": "2026-04-24",
-    "totalWithdrawals": 1,
-    "totalConsumedGrams": 100,
-    "remainingDailyLimit": 3,
-    "withdrawals": [
-      {
-        "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
-        "quantity": 1,
-        "consumedGrams": 100,
-        "withdrawnAt": "2026-04-24T14:30:00Z"
-      }
-    ]
-  }
-Validação Esperada: userId na resposta de retirada corresponde ao usuário autenticado e aparece no histórico diário
-
-[Caso de Teste 08.02] - Retirada bem-sucedida registra data correta
-
-Título: Validar que retirada registra a data corrente (2026-04-24)
+Objetivo: Validar que retirada registra a data corrente
 
 Operação: POST /api/withdrawals seguido de GET /api/withdrawals/daily
 Headers:
@@ -94,7 +42,7 @@ JSON
 }
 Validação Esperada: date no histórico é "2026-04-24" (data corrente)
 [Caso de Teste 08.03] - Retirada bem-sucedida registra quantidade consumida (100 gramas)
-Título: Validar que retirada registra quantidade consumida em gramas
+Objetivo: Validar que retirada registra quantidade consumida em gramas
 Operação: POST /api/withdrawals seguido de GET /api/withdrawals/daily
 Headers:
 Code
@@ -135,7 +83,7 @@ JSON
 }
 Validação Esperada: consumedGrams = 100 em cada retirada e totalConsumedGrams = 100 no histórico
 [Caso de Teste 08.04] - Histórico diário consideram registros existentes para validação de limite
-Título: Validar que segunda retirada verifica limites baseado em registros anteriores do dia
+Objetivo: Validar que segunda retirada verifica limites baseado em registros anteriores do dia
 Operação: POST /api/withdrawals (1ª vez) → POST /api/withdrawals (2ª vez) → GET /api/withdrawals/daily
 Headers:
 Code
@@ -178,7 +126,7 @@ JSON
 }
 Validação Esperada: Ambas retiradas são permitidas, pois 2 < 4 (limite diário)
 [Caso de Teste 08.05] - Histórico diário bloqueia 5ª retirada considerando registros do dia
-Título: Validar que 5ª retirada é rejeitada porque registros anteriores indicam limite atingido
+Objetivo: Validar que 5ª retirada é rejeitada porque registros anteriores indicam limite atingido
 Operação: POST /api/withdrawals (5ª tentativa após 4 retiradas prévias)
 Headers:
 Code
@@ -197,7 +145,7 @@ JSON
 Pré-condição: 4 retiradas já registradas no dia corrente
 Validação Esperada: Sistema consulta registros do dia e rejeita porque totalWithdrawals = 4
 [Caso de Teste 08.06] - Registros de retirada possuem timestamp correto
-Título: Validar que cada retirada registra o timestamp (data e hora) exato da operação
+Objetivo: Validar que cada retirada registra o timestamp (data e hora) exato da operação
 Operação: POST /api/withdrawals (3 retiradas em horários diferentes) → GET /api/withdrawals/daily
 Headers:
 Code
@@ -234,7 +182,7 @@ JSON
 }
 Validação Esperada: Cada withdrawnAt é um timestamp ISO válido e reflete o horário da operação
 [Caso de Teste 08.07] - Consistência de registros entre múltiplas consultas do histórico
-Título: Validar que histórico diário retorna dados consistentes em múltiplas consultas
+Objetivo: Validar que histórico diário retorna dados consistentes em múltiplas consultas
 Operação: GET /api/withdrawals/daily (1ª consulta) → GET /api/withdrawals/daily (2ª consulta)
 Headers:
 Code
@@ -268,7 +216,7 @@ Resposta 2ª GET Esperada: Idêntica à 1ª consulta
 Validação Esperada: Dados são idênticos em ambas consultas (sem alterações entre elas)
 [Caso de Teste 09.08] - Registros persistem após retiradas bem-sucedidas
 Operação: POST /api/withdrawals → esperar período → GET /api/withdrawals/daily
-Título: Validar que registros de retirada persistem no sistema após a operação
+Objetivo: Validar que registros de retirada persistem no sistema após a operação
 Headers:
 Code
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
@@ -282,7 +230,7 @@ Status Code Esperado (GET): 200 OK
 Resposta GET Esperada: Contém a retirada registrada anteriormente
 Validação Esperada: Retirada realizada está presente no histórico diário
 [Caso de Teste 09.09] - Cada retirada recebe ID único
-Título: Validar que cada retirada registrada possui um ID único (UUID)
+Objetivo: Validar que cada retirada registrada possui um ID único (UUID)
 Operação: POST /api/withdrawals (3 retiradas consecutivas) → GET /api/withdrawals/daily
 Headers:
 Code
@@ -322,14 +270,15 @@ JSON
 }
 Validação Esperada: Todos os 3 IDs são únicos e diferentes entre si (nenhum ID é repetido)
 
-Resumo da Cobertura
-Caso	Objetivo	Tipo
-08.01	Integração - registro de userId	Integração 
-08.02	Integração - registro de data	Integração 
-08.03	Integração - registro de quantidade consumida	Integração 
-08.04	Integração - histórico considera registros para validação	Integração 
-08.05	Negócio - bloqueio de 5ª retirada com base em registros	Negócio 
-08.06	Validação - timestamps corretos em registros	Validação 
-08.07	Robustez - consistência entre consultas	Robustez ⚠️
-08.08	Persistência - registros persistem no sistema	Persistência 
-08.09	Validação - cada retirada possui ID único	Validação 
+
+
+Resumo da Cobertura:
+01	Integração - registro de userId	
+02	Integração - registro de data	
+03	Integração - registro de quantidade consumida	
+04	Integração - histórico considera registros para validação	
+05	Negócio - bloqueio de 5ª retirada com base em registros	
+06	Validação - timestamps corretos em registros	
+07	Robustez - consistência entre consultas	
+08	Persistência - registros persistem no sistema	
+09	Validação - cada retirada possui ID único	

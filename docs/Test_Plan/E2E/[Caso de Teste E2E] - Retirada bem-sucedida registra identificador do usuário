@@ -1,0 +1,47 @@
+Objetivo: Validar que retirada registra o ID do usuário autenticado
+
+Operação: POST /api/withdrawals seguido de GET /api/withdrawals/daily
+Headers:
+
+Code
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+Corpo da Requisição (POST):
+JSON
+  {
+    "quantity": 1
+  }
+
+Status Code Esperado (POST): 201 Created
+
+Resposta POST Esperada:
+JSON
+  {
+    "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+    "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+    "quantity": 1,
+    "consumedGrams": 100,
+    "remainingDoses": 49,
+    "withdrawnAt": "2026-04-24T14:30:00Z"
+  }
+
+Status Code Esperado (GET): 200 OK
+
+Resposta GET Esperada:
+JSON
+  {
+    "userId": "5f3b9e8f-3124-4d1f-9d9f-9082ab7d1c41",
+    "date": "2026-04-24",
+    "totalWithdrawals": 1,
+    "totalConsumedGrams": 100,
+    "remainingDailyLimit": 3,
+    "withdrawals": [
+      {
+        "id": "8acfe90c-d0b3-4c17-90f8-a6dbd01b278a",
+        "quantity": 1,
+        "consumedGrams": 100,
+        "withdrawnAt": "2026-04-24T14:30:00Z"
+      }
+    ]
+  }
+Validação Esperada: userId na resposta de retirada corresponde ao usuário autenticado e aparece no histórico diário
