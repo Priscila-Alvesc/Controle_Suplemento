@@ -8,6 +8,10 @@ info:
     de doses de suplemento.
 
     Esta definição foi construída com base nas user stories US01 a US09.
+    
+    Ambiente de teste controlado: o header `x-force-unavailable: true` pode ser
+    enviado para forçar resposta `503 Service Unavailable` nos endpoints de API.
+    Este comportamento deve ser usado apenas para automação de testes.
 servers:
   - url: http://localhost:3000
     description: Ambiente local
@@ -32,6 +36,8 @@ paths:
         Realiza o cadastro de um novo usuário na aplicação. O e-mail deve ser
         único na base.
       operationId: createUser
+      parameters:
+        - $ref: '#/components/parameters/ForceUnavailableHeader'
       requestBody:
         required: true
         content:
@@ -101,6 +107,8 @@ paths:
         Autentica um usuário previamente cadastrado e retorna um token JWT para
         acesso aos recursos protegidos.
       operationId: loginUser
+      parameters:
+        - $ref: '#/components/parameters/ForceUnavailableHeader'
       requestBody:
         required: true
         content:
@@ -151,6 +159,8 @@ paths:
         Retorna a quantidade de doses disponíveis com base no estoque atual,
         considerando que cada dose equivale a 100 gramas.
       operationId: getAvailableDoses
+      parameters:
+        - $ref: '#/components/parameters/ForceUnavailableHeader'
       security:
         - bearerAuth: []
       responses:
@@ -200,6 +210,8 @@ paths:
         autenticado, respeitando o limite de 4 doses por dia e a disponibilidade
         de estoque.
       operationId: createWithdrawal
+      parameters:
+        - $ref: '#/components/parameters/ForceUnavailableHeader'
       security:
         - bearerAuth: []
       requestBody:
@@ -276,6 +288,8 @@ paths:
         Retorna o histórico de retiradas do usuário autenticado na data corrente,
         permitindo o controle do limite diário de consumo.
       operationId: getDailyWithdrawals
+      parameters:
+        - $ref: '#/components/parameters/ForceUnavailableHeader'
       security:
         - bearerAuth: []
       responses:
@@ -316,6 +330,19 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
 
 components:
+  parameters:
+    ForceUnavailableHeader:
+      name: x-force-unavailable
+      in: header
+      required: false
+      description: >
+        Header de uso exclusivo em testes para forcar resposta
+        `503 Service Unavailable` no endpoint.
+      schema:
+        type: string
+        enum:
+          - 'true'
+
   securitySchemes:
     bearerAuth:
       type: http

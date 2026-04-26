@@ -14,6 +14,19 @@ const swaggerFilePath = path.resolve(__dirname, "..", "docs");
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  const forcedByHeader = req.get("x-force-unavailable") === "true";
+  const forcedByEnvironment = process.env.FORCE_UNAVAILABLE === "true";
+
+  if (forcedByHeader || forcedByEnvironment) {
+    return res.status(503).json({
+      error: "Servico temporariamente indisponivel.",
+    });
+  }
+
+  return next();
+});
+
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
