@@ -2,15 +2,14 @@ name: CI
 
 on: workflow_dispatch:
   push:
-    branches:
-      - main
+    branches: ["main"]
   pull_request:
-
+    branches: ["main"]
+   
 jobs:
   test:
-    name: API and Web Tests
+    name: API Tests
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -22,10 +21,10 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run API tests
-        run: npm test:api
+        run: npm run test:api
 
 
       - name: Upload API test report
@@ -33,5 +32,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: api-test-report
-          path: test/reports
+          path: test-results
           if-no-files-found: warn
