@@ -3,7 +3,7 @@ const {
   request,
   resetState,
   createAuthenticatedUser,
-} = require("./helpers/apiTestHelper");
+} = require("../helpers/apiTestHelper");
 
 async function withdrawNTimes(token, times) {
   for (let index = 0; index < times; index += 1) {

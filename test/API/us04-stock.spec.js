@@ -4,7 +4,7 @@ const {
   resetState,
   createAuthenticatedUser,
   setAvailableGrams,
-} = require("./helpers/apiTestHelper");
+} = require("../helpers/apiTestHelper");
 
 describe("US04 - Consulta de doses em estoque", () => {
   beforeEach(() => {

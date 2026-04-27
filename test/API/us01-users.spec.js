@@ -3,7 +3,7 @@ const {
   request,
   resetState,
   registerUser,
-} = require("./helpers/apiTestHelper");
+} = require("../helpers/apiTestHelper");
 
 describe("US01 - Cadastro de usuario", () => {
   beforeEach(() => {

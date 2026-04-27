@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test:api": "mocha --recursive \"test/**/*.spec.js\" --require test/helpers/setup.js --reporter mochawesome --reporter-option reportDir=test-results,reportFilename=api-test-report,quiet=true",
+    "test:api": "mocha --recursive \"test/API/**/*.spec.js\" --require test/helpers/setup.js --reporter mochawesome --reporter-option reportDir=test-results,reportFilename=api-test-report,quiet=true",
     "test:api:spec": "mocha --recursive \"test/**/*.spec.js\" --require test/helpers/setup.js"
   },
   "dependencies": {

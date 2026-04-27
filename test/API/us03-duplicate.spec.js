@@ -1,4 +1,4 @@
-const { resetState, registerUser } = require("./helpers/apiTestHelper");
+const { resetState, registerUser } = require("../helpers/apiTestHelper");
 
 describe("US03 - Prevencao de cadastro duplicado", () => {
   beforeEach(() => {

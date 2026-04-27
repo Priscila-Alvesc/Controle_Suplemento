@@ -4,7 +4,7 @@ const {
   resetState,
   registerUser,
   loginUser,
-} = require("./helpers/apiTestHelper");
+} = require("../helpers/apiTestHelper");
 
 describe("US02 - Autenticacao", () => {
   beforeEach(() => {

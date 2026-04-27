@@ -3,7 +3,7 @@ const {
   request,
   resetState,
   createAuthenticatedUser,
-} = require("./helpers/apiTestHelper");
+} = require("../helpers/apiTestHelper");
 
 describe("US05 - Retirada unitaria", () => {
   beforeEach(() => {
