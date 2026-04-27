@@ -8,7 +8,10 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "test:api": "mocha --recursive \"test/API/**/*.spec.js\" --require test/helpers/setup.js --reporter mochawesome --reporter-option reportDir=test-results,reportFilename=api-test-report,quiet=true",
-    "test:api:spec": "mocha --recursive \"test/**/*.spec.js\" --require test/helpers/setup.js"
+    "test:api:spec": "mocha --recursive \"test/**/*.spec.js\" --require test/helpers/setup.js",
+    "pretest:k6": "node -e \"require('fs').mkdirSync('test-results/k6',{ recursive: true })\"",
+    "test:k6": "k6 run test/K6/api-performance.test.js",
+    "test:k6:html": "k6 run test/K6/api-performance.test.js"
   },
   "dependencies": {
     "express": "^4.21.2",
