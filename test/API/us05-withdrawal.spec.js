@@ -10,7 +10,7 @@ describe("US05 - Retirada unitaria", () => {
     resetState();
   });
 
-  it("[Caso de Teste 06.01] - Retirada bem-sucedida de 1 dose", async () => {
+  it("[Caso de Teste 05.01] - Retirada bem-sucedida de 1 dose", async () => {
     const token = await createAuthenticatedUser();
     const response = await request(app)
       .post("/api/withdrawals")
@@ -28,7 +28,7 @@ describe("US05 - Retirada unitaria", () => {
     expect(response.body.withdrawnAt).to.be.a("string");
   });
 
-  it("[Caso de Teste 06.02] - Retirada rejeitada com quantidade 0", async () => {
+  it("[Caso de Teste 05.02] - Retirada rejeitada com quantidade 0", async () => {
     const token = await createAuthenticatedUser();
     const response = await request(app)
       .post("/api/withdrawals")
@@ -40,7 +40,7 @@ describe("US05 - Retirada unitaria", () => {
     expect(response.body.details).to.be.an("array");
   });
 
-  it("[Caso de Teste 06.03] - Retirada rejeitada com quantidade 2", async () => {
+  it("[Caso de Teste 05.03] - Retirada rejeitada com quantidade 2", async () => {
     const token = await createAuthenticatedUser();
     const response = await request(app)
       .post("/api/withdrawals")
@@ -52,7 +52,7 @@ describe("US05 - Retirada unitaria", () => {
     expect(response.body.details).to.be.an("array");
   });
 
-  it("[Caso de Teste 06.06] - Retirada rejeitada sem autenticacao", async () => {
+  it("[Caso de Teste 05.06] - Retirada rejeitada sem autenticacao", async () => {
     const response = await request(app).post("/api/withdrawals").send({ quantity: 1 });
 
     expect(response.status).to.equal(401);
