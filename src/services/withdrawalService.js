@@ -16,7 +16,7 @@ function getCurrentDate() {
 function createUserWithdrawal(userId, payload) {
   const quantity = Number(payload.quantity);
 
-  if (quantity !== 1) {
+  if (quantity !== 0 ) {
     throw new HttpError(400, "Quantidade invalida para retirada.", [
       {
         field: "quantity",
