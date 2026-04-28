@@ -2,8 +2,22 @@
   "name": "controle-suplemento-api",
   "version": "1.0.0",
   "description": "API REST em Express para controle de estoque de suplementos com banco em memoria.",
-  "main": "src/server.js",
+  "homepage": "https://github.com/Priscila-Alvesc/Controle_Suplemento#readme",
+  "bugs": {
+    "url": "https://github.com/Priscila-Alvesc/Controle_Suplemento/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Priscila-Alvesc/Controle_Suplemento.git"
+  },
+  "license": "ISC",
+  "author": "",
   "type": "commonjs",
+  "main": "src/server.js",
+  "directories": {
+    "doc": "docs",
+    "test": "test"
+  },
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
