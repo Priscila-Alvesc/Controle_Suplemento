@@ -1,10 +1,10 @@
-# GitHub diretório Wiki 
+## GitHub diretório Wiki 
 É possível termos acesso a especificação do èpico e regras de negócios
 
-# Test Plan 
+## Test Plan 
 Implementação do plano de testes se encontra dentro do diretório Controle_Suplemento\docs\Test_Plan
 
-# Github diretório Issues
+## Github diretório Issues
 
 O código original era:
 function createUserWithdrawal(userId, payload) {
@@ -40,7 +40,7 @@ Essa mudança gera inconsistências, gerando o que contradiz a mensagem de erro 
 
 Issues registrados na github para exemplicar abertura de bugs para tratativa da aplicação.
 
-# API de Controle de Suplementos
+## API de Controle de Suplementos
 
 Implementacao em JavaScript com Express e armazenamento em memoria baseada no contrato definido em `docs/swagger.yaml`.
 
