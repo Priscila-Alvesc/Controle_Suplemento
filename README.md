@@ -7,6 +7,7 @@ Implementação do plano de testes se encontra dentro do diretório Controle_Sup
 ## Github diretório Issues
 
 O código original era:
+\`\`\`
 function createUserWithdrawal(userId, payload) {
   const quantity = Number(payload.quantity);
 
@@ -19,12 +20,14 @@ function createUserWithdrawal(userId, payload) {
     ]);
   }
 }
+\`\`\`
 
 Ou seja, a regra de negócio exigia que apenas 1 dose fosse permitida por solicitação. Qualquer valor diferente de 1 gerava erro.
 
 De forma proposital e didática, alteramos o código para:
 function createUserWithdrawal(userId, payload) {
-  const quantity = Number(payload.quantity);
+ \`\`\`
+ const quantity = Number(payload.quantity);
 
   if (quantity !== 0) {
     throw new HttpError(400, "Quantidade inválida para retirada.", [
@@ -35,6 +38,7 @@ function createUserWithdrawal(userId, payload) {
     ]);
   }
 }
+\`\`\`
 
 Essa mudança gera inconsistências, gerando o que contradiz a mensagem de erro e a regra de negócio.
 
