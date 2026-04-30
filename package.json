@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "API REST em Express para controle de estoque de suplementos com banco em memoria.",
   "homepage": "https://github.com/Priscila-Alvesc/Controle_Suplemento#readme",
+  "wiki": {
+    "url": "https://github.com/Priscila-Alvesc/Controle_Suplemento/wiki/Controle-de-Suplemento"
+  },
   "bugs": {
     "url": "https://github.com/Priscila-Alvesc/Controle_Suplemento/issues"
   },
@@ -11,7 +14,7 @@
     "url": "git+https://github.com/Priscila-Alvesc/Controle_Suplemento.git"
   },
   "license": "ISC",
-  "author": "",
+  "author": "Priscila Alves Costa",
   "type": "commonjs",
   "main": "src/server.js",
   "directories": {
@@ -21,6 +24,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
+    "test": "npm run test:all",
+    "test:all": "npm run test:api:spec && npm run test:k6",
     "test:api": "mocha --recursive \"test/API/**/*.spec.js\" --require test/helpers/setup.js --reporter mochawesome --reporter-option reportDir=test-results,reportFilename=api-test-report,quiet=true",
     "test:api:spec": "mocha --recursive \"test/**/*.spec.js\" --require test/helpers/setup.js",
     "pretest:k6": "node -e \"require('fs').mkdirSync('test-results/k6',{ recursive: true })\"",
