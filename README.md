@@ -1,87 +1,139 @@
-## GitHub diretório Wiki 
-É possível termos acesso a especificação do èpico e regras de negócios
+# API de Controle de Suplementos
 
-## Test Plan 
-Implementação do plano de testes se encontra dentro do diretório Controle_Suplemento\docs\Test_Plan
+API REST em Node.js e Express para controle de estoque e retirada diária de suplementos. A aplicação usa armazenamento em memória e segue o contrato documentado em [docs/swagger.yaml](docs/swagger.yaml).
 
-## Github diretório Issues
+## Links do Projeto
 
-O código original era:
-\`\`\`
-function createUserWithdrawal(userId, payload) {
-  const quantity = Number(payload.quantity);
-
-  if (quantity !== 1) {
-    throw new HttpError(400, "Quantidade inválida para retirada.", [
-      {
-        field: "quantity",
-        message: "Apenas 1 dose por solicitação é permitida.",
-      },
-    ]);
-  }
-}
-\`\`\`
-
-Ou seja, a regra de negócio exigia que apenas 1 dose fosse permitida por solicitação. Qualquer valor diferente de 1 gerava erro.
-
-De forma proposital e didática, alteramos o código para:
-function createUserWithdrawal(userId, payload) {
- \`\`\`
- const quantity = Number(payload.quantity);
-
-  if (quantity !== 0) {
-    throw new HttpError(400, "Quantidade inválida para retirada.", [
-      {
-        field: "quantity",
-        message: "Apenas 1 dose por solicitação é permitida.",
-      },
-    ]);
-  }
-}
-\`\`\`
-
-Essa mudança gera inconsistências, gerando o que contradiz a mensagem de erro e a regra de negócio.
-
-Issues registrados na github para exemplicar abertura de bugs para tratativa da aplicação.
-
-## API de Controle de Suplementos
-
-Implementacao em JavaScript com Express e armazenamento em memoria baseada no contrato definido em `docs/swagger.yaml`.
+- Wiki: <https://github.com/Priscila-Alvesc/Controle_Suplemento/wiki/Controle-de-Suplemento>
+- Issues: <https://github.com/Priscila-Alvesc/Controle_Suplemento/issues>
+- Plano de testes: [docs/Test_Plan](docs/Test_Plan)
 
 ## Requisitos
 
 - Node.js 22+
+- npm
+- k6, para executar os testes de performance da pasta [test/K6](test/K6)
 
-## Como executar
+## Instalação
 
 ```bash
 npm install
+```
+
+## Como Executar
+
+Para iniciar a API em `http://localhost:3000`:
+
+```bash
 npm start
 ```
 
-A API sera iniciada porta localhost:3000`.
+Para desenvolvimento com recarregamento automático:
 
-Documentação  API pode ser acessada via : http://localhost:3000/docs
+```bash
+npm run dev
+```
+
+A documentação Swagger fica disponível em:
+
+```text
+http://localhost:3000/docs
+```
+
+O endpoint de saúde fica disponível em:
+
+```text
+http://localhost:3000/health
+```
+
+## Scripts de Teste
+
+Executa todos os testes configurados no projeto:
+
+```bash
+npm test
+```
+
+O comando acima executa:
+
+```bash
+npm run test:all
+```
+
+Executa somente os testes automatizados de API com Mocha:
+
+```bash
+npm run test:api:spec
+```
+
+Executa os testes de API com relatório Mochawesome:
+
+```bash
+npm run test:api
+```
+
+Executa os testes de performance com k6:
+
+```bash
+npm run test:k6
+```
+
+Importante: para executar `npm test`, a API deve estar rodando em `http://localhost:3000`, pois o teste k6 consome a aplicação via HTTP.
 
 ## Endpoints
 
+- `GET /health`
+- `GET /docs`
 - `POST /api/users`
 - `POST /api/auth/login`
 - `GET /api/stock/doses`
 - `POST /api/withdrawals`
 - `GET /api/withdrawals/daily`
 
-## Regras implementadas
+## Regras Implementadas
 
-- cadastro de usuario com e-mail unico;
-- autenticacao com JWT;
-- consulta de estoque protegido por token;
-- retirada de apenas 1 dose por solicitacao;
-- limite de 4 retiradas por usuario por dia;
-- controle de estoque em memoria considerando 100g por dose;
-- respostas de erro padronizadas.
+- Cadastro de usuário com e-mail único.
+- Autenticação com JWT.
+- Consulta de estoque protegida por token.
+- Retirada de apenas 1 dose por solicitação.
+- Limite de 4 retiradas por usuário por dia.
+- Controle de estoque em memória considerando 100g por dose.
+- Estoque inicial de 5000g.
+- Respostas de erro padronizadas.
 
-## Variaveis de ambiente
+## Variáveis de Ambiente
 
-- `PORT`: porta da aplicacao. Padrao `3000`.
-- `JWT_SECRET`: segredo usado para assinar o token. Possui valor padrao para desenvolvimento local.
+- `PORT`: porta da aplicação. Valor padrão: `3000`.
+- `JWT_SECRET`: segredo usado para assinar o token JWT. Possui valor padrão para desenvolvimento local.
+- `FORCE_UNAVAILABLE`: quando definido como `true`, força resposta `503` para simular indisponibilidade.
+
+## Estrutura Principal
+
+```text
+src/
+  app.js
+  server.js
+  config/
+  data/
+  middlewares/
+  routes/
+  services/
+  utils/
+
+test/
+  API/
+  K6/
+  helpers/
+
+docs/
+  swagger.yaml
+  Test_Plan/
+```
+
+## Observações de Qualidade
+
+Os testes de API cobrem cadastro, autenticação, estoque, retirada, limite diário e fluxo E2E. Os testes de performance usam k6 e geram relatório HTML em:
+
+```text
+test-results/k6/performance-report.html
+```
